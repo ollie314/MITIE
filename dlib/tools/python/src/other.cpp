@@ -57,6 +57,9 @@ list _max_cost_assignment (
     const matrix<double>& cost
 )
 {
+    if (cost.nr() != cost.nc())
+        throw dlib::error("The input matrix must be square.");
+
     // max_cost_assignment() only works with integer matrices, so convert from
     // double to integer.
     const double scale = (std::numeric_limits<dlib::int64>::max()/1000)/max(abs(cost));
@@ -70,6 +73,14 @@ double _assignment_cost (
 )
 {
     return assignment_cost(cost, python_list_to_vector<long>(assignment));
+}
+
+// ----------------------------------------------------------------------------------------
+
+void hit_enter_to_continue()
+{
+    std::cout << "Hit enter to continue";
+    std::cin.get();
 }
 
 // ----------------------------------------------------------------------------------------
@@ -140,5 +151,8 @@ present in the output.   "
 ensures    \n\
     - saves the data to the given file in libsvm format   " 
     );
+
+    def("hit_enter_to_continue", hit_enter_to_continue, 
+        "Asks the user to hit enter to continue and pauses until they do so.");
 }
 

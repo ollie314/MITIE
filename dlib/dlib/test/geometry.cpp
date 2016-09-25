@@ -646,6 +646,10 @@ namespace
             DLIB_TEST(length(t(from[i])-to[i]) < 1e-14);
             DLIB_TEST(length(tinv(t(from[i]))-from[i]) < 1e-14);
             DLIB_TEST(length(t(tinv(from[i]))-from[i]) < 1e-14);
+
+            point_transform_affine temp = t*inv(t);
+            DLIB_TEST(length(temp.get_b()) < 1e-14);
+            DLIB_TEST(max(abs(temp.get_m() - identity_matrix<double>(2))) < 1e-14);
         }
 
         ostringstream sout;
@@ -692,6 +696,11 @@ namespace
                 to_points.push_back(tran(p) + (randm(2,1,rnd)-0.5)*error_rate);
                 DLIB_TEST(length(traninv(tran(p))-p) <= 1e-5);
                 DLIB_TEST(length(tran(traninv(p))-p) <= 1e-5);
+
+                point_transform_projective temp = tran*traninv;
+                DLIB_TEST_MSG(max(abs(temp.get_m() - identity_matrix<double>(3))) < 1e-10, temp.get_m());
+                temp = traninv*tran;
+                DLIB_TEST_MSG(max(abs(temp.get_m() - identity_matrix<double>(3))) < 1e-10, temp.get_m());
             }
 
 
@@ -730,6 +739,117 @@ namespace
 
 // ----------------------------------------------------------------------------------------
 
+    template <typename T>
+    void test_find_similarity_transform()
+    {
+        print_spinner();
+        std::vector<dlib::vector<T,2> > from_points, to_points;
+
+        from_points.push_back(dlib::vector<T,2>(0,0));
+        from_points.push_back(dlib::vector<T,2>(0,1));
+        from_points.push_back(dlib::vector<T,2>(1,0));
+
+        to_points.push_back(dlib::vector<T,2>(8,0));
+        to_points.push_back(dlib::vector<T,2>(6,0));
+        to_points.push_back(dlib::vector<T,2>(8,2));
+
+        point_transform_affine tform = find_similarity_transform(from_points, to_points);
+
+        for (unsigned long i = 0; i < from_points.size(); ++i)
+        {
+            DLIB_TEST(length(tform(from_points[i]) - to_points[i]) < 1e-14);
+        }
+    }
+
+    template <typename T>
+    void test_find_similarity_transform2()
+    {
+        print_spinner();
+        std::vector<dlib::vector<T,2> > from_points, to_points;
+
+        from_points.push_back(dlib::vector<T,2>(0,0));
+        from_points.push_back(dlib::vector<T,2>(0,1));
+
+        to_points.push_back(dlib::vector<T,2>(8,0));
+        to_points.push_back(dlib::vector<T,2>(6,0));
+
+        point_transform_affine tform = find_similarity_transform(from_points, to_points);
+
+        for (unsigned long i = 0; i < from_points.size(); ++i)
+        {
+            DLIB_TEST(length(tform(from_points[i]) - to_points[i]) < 1e-14);
+        }
+    }
+
+
+// ----------------------------------------------------------------------------------------
+
+    void test_rect_to_drect()
+    {
+        print_spinner();
+        dlib::rand rnd;
+        for (int i = 0; i < 5000; ++i)
+        {
+            rectangle rect = centered_rect(rnd.get_random_32bit_number()%100,
+                rnd.get_random_32bit_number()%100,
+                rnd.get_random_32bit_number()%100,
+                rnd.get_random_32bit_number()%100);
+
+            drectangle drect = rect;
+            rectangle rect2 = drect;
+            DLIB_TEST(rect2 == rect);
+            DLIB_TEST(rect.width() == drect.width());
+            DLIB_TEST(rect.height() == drect.height());
+            DLIB_TEST(dcenter(rect) == dcenter(drect));
+            DLIB_TEST(rect.is_empty() == drect.is_empty());
+        }
+    }
+
+// ----------------------------------------------------------------------------------------
+
+    void test_affine3d()
+    {
+        const dlib::vector<double> x(1,0,0);
+        const dlib::vector<double> y(0,1,0);
+        const dlib::vector<double> z(0,0,1);
+        const dlib::vector<double> e(1,1,1);
+        const dlib::vector<double> ex(-1,1,1);
+        const dlib::vector<double> ey(1,-1,1);
+        const dlib::vector<double> ez(1,1,-1);
+
+        dlib::vector<double> w;
+
+        w = rotate_around_z(pi/2)(x);
+        DLIB_TEST(length(w-y) < 1e-12);
+        w = rotate_around_z(pi/2)(e);
+        DLIB_TEST(length(w-ex) < 1e-12);
+
+        w = rotate_around_y(-pi/2)(x);
+        DLIB_TEST(length(w-z) < 1e-12);
+        w = rotate_around_y(pi/2)(e);
+        DLIB_TEST(length(w-ez) < 1e-12);
+
+        w = rotate_around_x(pi/2)(y);
+        DLIB_TEST(length(w-z) < 1e-12);
+        w = rotate_around_x(pi/2)(e);
+        DLIB_TEST(length(w-ey) < 1e-12);
+
+        w = translate_point(x)(y);
+        DLIB_TEST(length(w-x-y) < 1e-12);
+
+        point_transform_affine3d tform;
+        tform = rotate_around_x(pi/2)*rotate_around_z(pi/2)*translate_point(x);
+        DLIB_TEST(length(tform(dlib::vector<double>())-z) < 1e-12);
+        DLIB_TEST(length(inv(tform)(z)) < 1e-12);
+
+        point_transform_affine tform2; 
+        tform = tform*tform2;// the default tform is the identity mapping so this shouldn't do anything different 
+        DLIB_TEST(length(tform(dlib::vector<double>())-z) < 1e-12);
+        DLIB_TEST(length(inv(tform)(z)) < 1e-12);
+    }
+
+// ----------------------------------------------------------------------------------------
+
     class geometry_tester : public tester
     {
     public:
@@ -742,11 +862,18 @@ namespace
         void perform_test (
         )
         {
+            test_affine3d();
+            test_rect_to_drect();
             geometry_test();
             test_border_enumerator();
             test_find_affine_transform();
             DLIB_TEST(projective_transform_pass_rate(0.1) > 0.99);
             DLIB_TEST(projective_transform_pass_rate(0.0) == 1);
+
+            test_find_similarity_transform<double>(); 
+            test_find_similarity_transform2<double>(); 
+            test_find_similarity_transform<float>(); 
+            test_find_similarity_transform2<float>(); 
         }
     } a;
 

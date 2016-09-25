@@ -42,7 +42,7 @@
          <name>Dense Matrix Tools</name>
          <item>matrix</item>
          <item nolink="true">
-            <name>Basic_Math_Operators</name>
+            <name>Basic Math Operators</name>
             <sub>
                <item>
                   <name>exp</name>
@@ -167,7 +167,7 @@
             </sub>
          </item>
          <item nolink="true">
-            <name>Linear_Algebra</name>
+            <name>Linear Algebra</name>
             <sub>
                <item>
                   <name>inv</name>
@@ -290,7 +290,7 @@
             </sub>
          </item>
          <item nolink="true">
-            <name>Sub_Matrix_Expressions</name>
+            <name>Sub Matrix Expressions</name>
             <sub>
                <item>
                   <name>range</name>
@@ -358,6 +358,18 @@
                   <link>dlib/matrix/matrix_utilities_abstract.h.html#find_min_and_max</link>
                </item>
                <item>
+                  <name>max_point</name>
+                  <link>dlib/matrix/matrix_utilities_abstract.h.html#max_point</link>
+               </item>
+               <item>
+                  <name>max_point_interpolated</name>
+                  <link>dlib/matrix/matrix_utilities_abstract.h.html#max_point_interpolated</link>
+               </item>
+               <item>
+                  <name>min_point</name>
+                  <link>dlib/matrix/matrix_utilities_abstract.h.html#min_point</link>
+               </item>
+               <item>
                   <name>index_of_min</name>
                   <link>dlib/matrix/matrix_utilities_abstract.h.html#index_of_min</link>
                </item>
@@ -388,7 +400,7 @@
             </sub>
          </item>
          <item nolink="true">
-            <name>Other_Utilities</name>
+            <name>Other Utilities</name>
             <sub>
                <item>
                   <name>fft</name>
@@ -587,13 +599,20 @@
          <name>2D/3D Geometry</name>
          <item>border_enumerator</item> 
          <item>rectangle</item> 
+         <item>drectangle</item> 
          <item>vector</item> 
          <item>point</item> 
          <item>rotate_point</item> 
+         <item>rotate_around_x</item> 
+         <item>rotate_around_y</item> 
+         <item>rotate_around_z</item> 
          <item>point_rotator</item> 
          <item>point_transform</item> 
+         <item>camera_transform</item> 
          <item>point_transform_affine</item> 
+         <item>point_transform_affine3d</item> 
          <item>find_affine_transform</item> 
+         <item>find_similarity_transform</item> 
          <item>point_transform_projective</item> 
          <item>find_projective_transform</item> 
          <item>rotation_matrix</item> 
@@ -605,12 +624,15 @@
          <item>shrink_rect</item> 
          <item>grow_rect</item> 
          <item>translate_rect</item> 
+         <item>translate_point</item> 
          <item>resize_rect</item> 
          <item>resize_rect_width</item> 
          <item>resize_rect_height</item> 
          <item>move_rect</item> 
          <item>nearest_point</item> 
          <item>distance_to_rect_edge</item> 
+         <item>clip_line_to_rectangle</item> 
+         <item>distance_to_line</item> 
       </section>
 
 
@@ -851,6 +873,32 @@
    <!-- ************************************************************************* -->
 
       <component>
+         <name>distance_to_line</name>
+         <file>dlib/geometry.h</file>
+         <spec_file link="true">dlib/geometry/rectangle_abstract.h</spec_file>
+         <description>        
+            This function takes a line and a <a href="#point">point</a>
+            and returns the distance from the line to the point.  
+         </description>
+                                 
+      </component>
+
+   <!-- ************************************************************************* -->
+
+      <component>
+         <name>clip_line_to_rectangle</name>
+         <file>dlib/geometry.h</file>
+         <spec_file link="true">dlib/geometry/rectangle_abstract.h</spec_file>
+         <description>        
+            This function takes a <a href="#rectangle">rectangle</a> and a line segment and
+            returns the part of the line segment that is entirely contained within the
+            rectangle.
+         </description>
+      </component>
+
+   <!-- ************************************************************************* -->
+
+      <component>
          <name>move_rect</name>
          <file>dlib/geometry.h</file>
          <spec_file link="true">dlib/geometry/rectangle_abstract.h</spec_file>
@@ -1044,9 +1092,35 @@
          <file>dlib/geometry.h</file>
          <spec_file link="true">dlib/geometry/point_transforms_abstract.h</spec_file>
          <description>        
-            This is an object that applies an affine transformation to a <a href="#vector">vector</a> or 
+            This is an object that applies a 2D affine transformation to a <a href="#vector">vector</a> or 
             <a href="#point">point</a>.  Note that you can use <a href="#find_affine_transform">find_affine_transform</a>
             to easily create affine transforms from sets of point correspondences.
+         </description>
+                                 
+      </component>
+
+   <!-- ************************************************************************* -->
+
+      <component>
+         <name>camera_transform</name>
+         <file>dlib/geometry.h</file>
+         <spec_file link="true">dlib/geometry/point_transforms_abstract.h</spec_file>
+         <description>        
+            This object maps 3D <a href="#vector">points</a> into the image plane of a camera.  Therefore,
+            you can use it to compute 2D representations of 3D data from the point of
+            view of some camera in 3D space.
+         </description>
+                                 
+      </component>
+
+   <!-- ************************************************************************* -->
+
+      <component>
+         <name>point_transform_affine3d</name>
+         <file>dlib/geometry.h</file>
+         <spec_file link="true">dlib/geometry/point_transforms_abstract.h</spec_file>
+         <description>        
+            This is an object that applies a 3D affine transformation to a <a href="#vector">vector</a>.  
          </description>
                                  
       </component>
@@ -1061,6 +1135,22 @@
             This is a routine that takes in two sets of points and finds the
             best <a href="#point_transform_affine">affine transformation</a>
             that maps between them.
+         </description>
+                                 
+      </component>
+
+   <!-- ************************************************************************* -->
+
+      <component>
+         <name>find_similarity_transform</name>
+         <file>dlib/geometry.h</file>
+         <spec_file link="true">dlib/geometry/point_transforms_abstract.h</spec_file>
+         <description>        
+            This is a routine that takes in two sets of points and finds the
+            best <a href="#point_transform_affine">affine transformation</a>
+            that maps between them.  However, it considers only rotations, translations,
+            and uniform scale changes in finding the mapping.  Therefore, it finds
+            a similarity transformation rather than a general affine transform.
          </description>
                                  
       </component>
@@ -1108,6 +1198,54 @@
    <!-- ************************************************************************* -->
 
       <component>
+         <name>rotate_around_x</name>
+         <file>dlib/geometry.h</file>
+         <spec_file link="true">dlib/geometry/point_transforms_abstract.h</spec_file>
+         <description>        
+            This is a method for creating a <a href="#point_transform_affine3d">point_transform_affine3d</a>
+            that rotates points around the x-axis.
+         </description>
+      </component>
+
+   <!-- ************************************************************************* -->
+
+      <component>
+         <name>rotate_around_y</name>
+         <file>dlib/geometry.h</file>
+         <spec_file link="true">dlib/geometry/point_transforms_abstract.h</spec_file>
+         <description>        
+            This is a method for creating a <a href="#point_transform_affine3d">point_transform_affine3d</a>
+            that rotates points around the y-axis.
+         </description>
+      </component>
+
+   <!-- ************************************************************************* -->
+
+      <component>
+         <name>rotate_around_z</name>
+         <file>dlib/geometry.h</file>
+         <spec_file link="true">dlib/geometry/point_transforms_abstract.h</spec_file>
+         <description>        
+            This is a method for creating a <a href="#point_transform_affine3d">point_transform_affine3d</a>
+            that rotates points around the z-axis.
+         </description>
+      </component>
+
+   <!-- ************************************************************************* -->
+
+      <component>
+         <name>translate_point</name>
+         <file>dlib/geometry.h</file>
+         <spec_file link="true">dlib/geometry/point_transforms_abstract.h</spec_file>
+         <description>        
+            This is a method for creating a <a href="#point_transform_affine3d">point_transform_affine3d</a>
+            that just translates points. 
+         </description>
+      </component>
+
+   <!-- ************************************************************************* -->
+
+      <component>
          <name>get_rect</name>
          <file>dlib/geometry.h</file>
          <spec_file link="true">dlib/geometry/rectangle_abstract.h</spec_file>
@@ -1120,6 +1258,20 @@
 
    <!-- ************************************************************************* -->
 
+      <component>
+         <name>drectangle</name>
+         <file>dlib/geometry.h</file>
+         <spec_file>dlib/geometry/drectangle_abstract.h</spec_file>
+         <description>
+            This object represents a rectangular region inside a Cartesian 
+            coordinate system.  It is very similar to the <a href="#rectangle">rectangle</a>
+            except that it uses double variables instead of longs to represent the location of the rectangle.
+            Therefore, it can position rectangles with sub-pixel accuracy.
+         </description>
+      </component>
+            
+   <!-- ************************************************************************* -->
+      
       <component>
          <name>rectangle</name>
          <file>dlib/geometry.h</file>

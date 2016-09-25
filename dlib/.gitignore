@@ -1,2 +1,6 @@
+**/.idea
+*~
 *.swp
 *.o
+*.so
+build

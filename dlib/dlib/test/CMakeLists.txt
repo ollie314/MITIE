@@ -3,7 +3,7 @@
 # information about it at http://www.cmake.org
 #
 
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8.4)
 
 # This variable contains a list of all the tests we are building
 # into the regression test suite.
@@ -44,6 +44,7 @@ set (tests
    entropy_coder.cpp
    entropy_encoder_model.cpp
    example_args.cpp
+   face.cpp
    fft.cpp
    fhog.cpp
    filtering.cpp
@@ -67,6 +68,7 @@ set (tests
    learning_to_track.cpp
    least_squares.cpp
    linear_manifold_regularizer.cpp
+   lspi.cpp
    lz77_buffer.cpp
    map.cpp
    matrix2.cpp
@@ -82,6 +84,7 @@ set (tests
    md5.cpp
    member_function_pointer.cpp
    metaprogramming.cpp
+   mpc.cpp
    multithreaded_object.cpp
    numerical_integration.cpp
    object_detector.cpp
@@ -162,7 +165,7 @@ TARGET_LINK_LIBRARIES(${target_name} dlib )
 
 if (NOT DLIB_NO_GUI_SUPPORT)
    add_subdirectory(gui)
-   add_subdirectory(../../examples examples_build)
+   add_subdirectory(examples)
 endif()
 
 

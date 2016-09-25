@@ -104,15 +104,19 @@ Davis E. King. <a href="http://jmlr.csail.mit.edu/papers/volume10/king09a/king09
          <item>structural_track_association_trainer</item> 
          <item>structural_graph_labeling_trainer</item> 
          <item>svm_rank_trainer</item> 
+         <item>shape_predictor_trainer</item> 
       </section>
       <section>
          <name>Clustering</name>
          <item>pick_initial_centers</item> 
          <item>kkmeans</item>
          <item>find_clusters_using_kmeans</item> 
+         <item>find_clusters_using_angular_kmeans</item> 
          <item>nearest_center</item> 
          <item>newman_cluster</item> 
+         <item>spectral_cluster</item> 
          <item>chinese_whispers</item> 
+         <item>bottom_up_cluster</item> 
          <item>modularity</item> 
       </section>
       <section>
@@ -131,6 +135,11 @@ Davis E. King. <a href="http://jmlr.csail.mit.edu/papers/volume10/king09a/king09
          <item>linear_manifold_regularizer</item>
          <item>discriminant_pca</item> 
          <item>vector_normalizer_frobmetric</item> 
+         <item>compute_lda_transform</item> 
+      </section>
+      <section>
+         <name>Reinforcement Learning</name>
+         <item>lspi</item> 
       </section>
       <section>
          <name>Feature Selection</name>
@@ -163,7 +172,9 @@ Davis E. King. <a href="http://jmlr.csail.mit.edu/papers/volume10/king09a/king09
          <item>test_track_association_function</item>
          <item>test_graph_labeling_function</item>
          <item>test_ranking_function</item>
+         <item>test_shape_predictor</item>
          <item>average_precision</item>
+         <item>equal_error_rate</item>
       </section>
 
       <section>
@@ -213,6 +224,7 @@ Davis E. King. <a href="http://jmlr.csail.mit.edu/papers/volume10/king09a/king09
          <item>assignment_function</item>
          <item>track_association_function</item>
          <item>graph_labeler</item>
+         <item>policy</item>
       </section>
 
       <section>
@@ -247,6 +259,7 @@ Davis E. King. <a href="http://jmlr.csail.mit.edu/papers/volume10/king09a/king09
          <item>is_ranking_problem</item>
          <item>count_ranking_inversions</item>
          <item>learn_platt_scaling</item>
+         <item>process_sample</item>
 
          
 
@@ -296,6 +309,34 @@ Davis E. King. <a href="http://jmlr.csail.mit.edu/papers/volume10/king09a/king09
    <!-- ************************************************************************* -->
 
       <component>
+         <name>spectral_cluster</name>
+         <file>dlib/clustering.h</file>
+         <spec_file link="true">dlib/clustering/spectral_cluster_abstract.h</spec_file>
+         <description>
+             This function performs the clustering algorithm described in the paper
+             <blockquote>On spectral clustering: Analysis and an algorithm by Ng, Jordan, and Weiss.</blockquote> 
+         </description>
+         <examples>
+            <example>kkmeans_ex.cpp.html</example>
+         </examples>
+                                 
+      </component>
+
+   <!-- ************************************************************************* -->
+
+      <component>
+         <name>bottom_up_cluster</name>
+         <file>dlib/clustering.h</file>
+         <spec_file link="true">dlib/clustering/bottom_up_cluster_abstract.h</spec_file>
+         <description>
+             This function runs a bottom up agglomerative clustering algorithm.   
+         </description>
+                                 
+      </component>
+
+   <!-- ************************************************************************* -->
+
+      <component>
          <name>chinese_whispers</name>
          <file>dlib/clustering.h</file>
          <spec_file link="true">dlib/clustering/chinese_whispers_abstract.h</spec_file>
@@ -317,7 +358,23 @@ Davis E. King. <a href="http://jmlr.csail.mit.edu/papers/volume10/king09a/king09
          <file>dlib/clustering.h</file>
          <spec_file link="true">dlib/svm/kkmeans_abstract.h</spec_file>
          <description>
-            This is just a simple linear kmeans clustering implementation.
+            This is a simple linear kmeans clustering implementation.
+            It uses Euclidean distance to compare samples.
+         </description>
+                                 
+      </component>
+
+   <!-- ************************************************************************* -->
+
+      <component>
+         <name>find_clusters_using_angular_kmeans</name>
+         <file>dlib/clustering.h</file>
+         <spec_file link="true">dlib/svm/kkmeans_abstract.h</spec_file>
+         <description>
+            This is a simple linear kmeans clustering implementation.
+            To compare a sample to a cluster, it measures the angle between them
+            with respect to the origin.  Therefore, it tries to find clusters
+            of points that all have small angles between each cluster member.
          </description>
                                  
       </component>
@@ -615,6 +672,20 @@ Davis E. King. <a href="http://jmlr.csail.mit.edu/papers/volume10/king09a/king09
                 form it.  This object then tries to find a transformation matrix that makes
                 the "near" vectors close to their anchors while the "far" vectors are
                 farther away.
+         </description>
+      </component>
+      
+   <!-- ************************************************************************* -->
+      
+      <component>
+         <name>compute_lda_transform</name>
+         <file>dlib/statistics.h</file>
+         <spec_file link="true">dlib/statistics/lda_abstract.h</spec_file>
+         <description>
+            This function performs the dimensionality reducing version of linear
+            discriminant analysis.  That is, you give it a set of labeled vectors and it
+            returns a linear transform that maps the input vectors into a new space that
+            is good for distinguishing between the different classes. 
          </description>
       </component>
       
@@ -1231,6 +1302,9 @@ Davis E. King. <a href="http://jmlr.csail.mit.edu/papers/volume10/king09a/king09
                      <a href="http://www.csie.ntu.edu.tw/~cjlin/libsvm">http://www.csie.ntu.edu.tw/~cjlin/libsvm</a></li>
                </ul>
          </description>
+         <examples>
+            <example>svm_c_ex.cpp.html</example>
+         </examples>
                                  
       </component>
       
@@ -1311,6 +1385,31 @@ Davis E. King. <a href="http://jmlr.csail.mit.edu/papers/volume10/king09a/king09
          <examples>
             <example>svm_rank_ex.cpp.html</example>
             <example>svm_rank.py.html</example>
+         </examples>
+                                 
+      </component>
+      
+   <!-- ************************************************************************* -->
+
+      <component>
+         <name>shape_predictor_trainer</name>
+         <file>dlib/image_processing.h</file>
+         <spec_file link="true">dlib/image_processing/shape_predictor_abstract.h</spec_file>
+         <description>
+               This object is a tool for training <a href="imaging.html#shape_predictor">shape_predictors</a> 
+               based on annotated training images.  Its implementation uses the algorithm described in:
+                <blockquote>
+                    One Millisecond Face Alignment with an Ensemble of Regression Trees
+                    by Vahid Kazemi and Josephine Sullivan, CVPR 2014
+                </blockquote>
+               It is capable of learning high quality shape models.  For example, this is an example output
+               for one of the faces in the HELEN face dataset: <br/><br/>
+               <img src='face_landmarking_example.png'/>
+
+         </description>
+         <examples>
+            <example>train_shape_predictor_ex.cpp.html</example>
+            <example>train_shape_predictor.py.html</example>
          </examples>
                                  
       </component>
@@ -1570,6 +1669,51 @@ Davis E. King. <a href="http://jmlr.csail.mit.edu/papers/volume10/king09a/king09
          <examples>
             <example>learning_to_track_ex.cpp.html</example>
          </examples>
+      </component>
+      
+   <!-- ************************************************************************* -->
+      
+      <component>
+         <name>lspi</name>
+         <file>dlib/control.h</file>
+         <spec_file link="true">dlib/control/lspi_abstract.h</spec_file>
+         <description>
+            This object is an implementation of the reinforcement learning algorithm
+            described in the following paper:
+            <blockquote>
+               Lagoudakis, Michail G., and Ronald Parr. "Least-squares policy
+               iteration." The Journal of Machine Learning Research 4 (2003):
+               1107-1149.
+            </blockquote>
+                
+         </description>
+      </component>
+      
+   <!-- ************************************************************************* -->
+      
+      <component>
+         <name>policy</name>
+         <file>dlib/control.h</file>
+         <spec_file link="true">dlib/control/approximate_linear_models_abstract.h</spec_file>
+         <description>
+                This is a policy (i.e. a control law) based on a linear function approximator.
+                You can use a tool like <a href="#lspi">lspi</a> to learn the parameters
+                of a policy.
+         </description>
+      </component>
+      
+   <!-- ************************************************************************* -->
+      
+      <component>
+         <name>process_sample</name>
+         <file>dlib/control.h</file>
+         <spec_file link="true">dlib/control/approximate_linear_models_abstract.h</spec_file>
+         <description>
+                This object holds a training sample for a reinforcement learning algorithm 
+                (e.g. <a href="#lspi">lspi</a>).
+                In particular, it contains a state, action, reward, next state sample from
+                some process.
+         </description>
       </component>
       
    <!-- ************************************************************************* -->
@@ -2670,6 +2814,19 @@ Davis E. King. <a href="http://jmlr.csail.mit.edu/papers/volume10/king09a/king09
    <!-- ************************************************************************* -->
       
       <component>
+         <name>equal_error_rate</name>
+         <file>dlib/statistics.h</file>
+         <spec_file link="true">dlib/statistics/lda_abstract.h</spec_file>
+         <description>
+              This function finds a threshold that best separates the elements of two
+              vectors by selecting the threshold with equal error rate.  It also reports
+              the value of the equal error rate.
+         </description>
+      </component>
+      
+   <!-- ************************************************************************* -->
+      
+      <component>
          <name>test_ranking_function</name>
          <file>dlib/svm.h</file>
          <spec_file link="true">dlib/svm/ranking_tools_abstract.h</spec_file>
@@ -2680,6 +2837,26 @@ Davis E. King. <a href="http://jmlr.csail.mit.edu/papers/volume10/king09a/king09
          <examples>
             <example>svm_rank_ex.cpp.html</example>
             <example>svm_rank.py.html</example>
+         </examples>
+                                 
+      </component>
+      
+   <!-- ************************************************************************* -->
+      
+      <component>
+         <name>test_shape_predictor</name>
+         <file>dlib/image_processing.h</file>
+         <spec_file link="true">dlib/image_processing/shape_predictor_abstract.h</spec_file>
+         <description>
+            Tests a <a href="imaging.html#shape_predictor">shape_predictor</a>'s ability to correctly 
+            predict the part locations of objects.  The output is the average distance (measured in pixels) between
+            each part and its true location.  You can optionally normalize each distance using a 
+            user supplied scale.  For example, when performing face landmarking, you might want to
+            normalize the distances by the interocular distance.
+         </description>
+         <examples>
+            <example>train_shape_predictor_ex.cpp.html</example>
+            <example>train_shape_predictor.py.html</example>
          </examples>
                                  
       </component>
@@ -2823,13 +3000,10 @@ Davis E. King. <a href="http://jmlr.csail.mit.edu/papers/volume10/king09a/king09
                <a href="imaging.html#scan_image_custom">scan_image_custom</a> object.  
 
             <p>
-               It learns the parameter vector by formulating the problem as a <a href="#structural_svm_problem">structural 
-               SVM problem</a>.  The general approach is similar to the method discussed in 
-               Learning to Localize Objects with Structured Output Regression by 
-               Matthew B. Blaschko and Christoph H. Lampert.  However, the method has 
-               been extended to datasets with multiple, potentially overlapping, objects 
-               per image and the measure of loss is different from what is described in 
-               the paper.  
+               It learns the parameter vector by formulating the problem as a <a
+               href="#structural_svm_problem">structural SVM problem</a>.  
+               The exact details of the method are described in the paper 
+               <a href="http://arxiv.org/abs/1502.00046">Max-Margin Object Detection</a> by Davis E. King.
             </p>
          </description>
                                  
@@ -2901,6 +3075,10 @@ Davis E. King. <a href="http://jmlr.csail.mit.edu/papers/volume10/king09a/king09
                This object is a tool for learning to detect objects in images based on a set of labeled images.  
                The training procedure produces an <a href="imaging.html#object_detector">object_detector</a> which
                can be used to predict the locations of objects in new images. 
+               It learns the parameter vector by formulating the problem as a <a
+               href="#structural_svm_problem">structural SVM problem</a>.  
+               The exact details of the method are described in the paper 
+               <a href="http://arxiv.org/abs/1502.00046">Max-Margin Object Detection</a> by Davis E. King.
                <p>
                Note that this is just a convenience wrapper around the 
                <a href="#structural_svm_object_detection_problem">structural_svm_object_detection_problem</a>

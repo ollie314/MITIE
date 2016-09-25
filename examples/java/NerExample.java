@@ -5,7 +5,7 @@
 */
 import edu.mit.ll.mitie.*;
 
-public class NerExample 
+public class NerExample
 {
     public static void main(String args[])
     {
@@ -15,7 +15,7 @@ public class NerExample
         // dll file is in your system PATH if on Windows or the LD_LIBRARY_PATH environment
         // variable if on a UNIX system.  This example program comes with both .bat and .sh
         // scripts that show how to do this on any system.
-        
+
 
 
         System.out.println("loading NER model...");
@@ -38,13 +38,18 @@ public class NerExample
         // Now print out all the named entities and their tags
         for (int i = 0; i < entities.size(); ++i)
         {
-            // Each EntityMention contains three integers.  The start and end define the
-            // range of tokens in the words vector that are part of the entity.  There is
-            // also a tag which indicates which element of possibleTags is associated with
-            // the entity.  So we can print out all the tagged entities as follows:
+            // Each EntityMention contains three integers and a double. The start and end
+            // define the range of tokens in the words vector that are part of the entity.
+            // There is also a tag which indicates which element of possibleTags is
+            // associated with the entity. There is also a score which indicates a
+            // confidence associated with the predicted tag (larger values mean MITIE is
+            // more confident in its prediction). So we can print out all the tagged
+            // entities as follows:
             EntityMention entity = entities.get(i);
             String tag = possibleTags.get(entity.getTag());
-            System.out.print("Entity tag: " + tag + "\t Entity text: ");
+            Double score = entity.getScore();
+            String scoreStr = String.format("%1$,.3f",score);
+            System.out.print("   Score: " + scoreStr + ": " + tag + ":");
             printEntity(words, entity);
         }
 
@@ -93,8 +98,8 @@ public class NerExample
     }
 
     public static void printEntity (
-        StringVector words,
-        EntityMention ent
+            StringVector words,
+            EntityMention ent
     )
     {
         // Print all the words in the range indicated by the entity ent.
@@ -106,4 +111,3 @@ public class NerExample
     }
 
 }
-

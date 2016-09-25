@@ -1,6 +1,6 @@
 // Copyright (C) 2014 Massachusetts Institute of Technology, Lincoln Laboratory
 // License: Boost Software License   See LICENSE.txt for the full license.
-// Authors: Davis E. King (davis.king@ll.mit.edu)
+// Authors: Davis E. King (davis@dlib.net)
 #ifndef MIT_LL_MITIE_NeR_FEATURE_EXTRACTION_H_
 #define MIT_LL_MITIE_NeR_FEATURE_EXTRACTION_H_
 
@@ -75,6 +75,29 @@ namespace mitie
                 - for all valid i:
                     V[i] == the word feature vector for the word sentence[i]
     !*/
+
+// ----------------------------------------------------------------------------------------
+
+    const unsigned long MAX_FEAT = 500000;
+
+    inline std::pair<dlib::uint32,double> make_feat (
+        const std::pair<dlib::uint64,dlib::uint64>& hash
+    )
+    {
+        const double feat_weight = 1.5;
+        const double rand_sign = (hash.first&1) ? 1 : -1;
+        return std::make_pair((dlib::uint32)(hash.second%MAX_FEAT), rand_sign*feat_weight);
+    }
+
+    inline std::pair<dlib::uint64,dlib::uint64> shash (
+        const std::string& word,
+        const dlib::uint32 seed 
+    )
+    {
+        if (word.size() == 0)
+            return std::make_pair(0,0);
+        return dlib::murmur_hash3_128bit(&word[0], word.size(), seed);
+    }
 
 // ----------------------------------------------------------------------------------------
 

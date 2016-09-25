@@ -1,7 +1,7 @@
 // Copyright (C) 2011  Davis E. King (davis@dlib.net)
 // License: Boost Software License   See LICENSE.txt for the full license.
-#undef DLIB_STRUCTURAL_SVM_DISTRIBUTeD_ABSTRACT_H__
-#ifdef DLIB_STRUCTURAL_SVM_DISTRIBUTeD_ABSTRACT_H__
+#undef DLIB_STRUCTURAL_SVM_DISTRIBUTeD_ABSTRACT_Hh_
+#ifdef DLIB_STRUCTURAL_SVM_DISTRIBUTeD_ABSTRACT_Hh_
 
 
 #include "structural_svm_problem_abstract.h"
@@ -64,6 +64,7 @@ namespace dlib
             INITIAL VALUE
                 - get_num_processing_nodes() == 0
                 - get_epsilon() == 0.001
+                - get_max_iterations() == 10000
                 - get_c() == 1
                 - This object will not be verbose
 
@@ -180,6 +181,22 @@ namespace dlib
                 - eps > 0
             ensures
                 - #get_cache_based_epsilon() == eps
+        !*/
+
+        void set_max_iterations (
+            unsigned long max_iter
+        );
+        /*!
+            ensures
+                - #get_max_iterations() == max_iter
+        !*/
+
+        unsigned long get_max_iterations (
+        ); 
+        /*!
+            ensures
+                - returns the maximum number of iterations the SVM optimizer is allowed to
+                  run before it is required to stop and return a result.
         !*/
 
         void add_nuclear_norm_regularizer (
@@ -335,6 +352,6 @@ namespace dlib
 
 }
 
-#endif // DLIB_STRUCTURAL_SVM_DISTRIBUTeD_ABSTRACT_H__
+#endif // DLIB_STRUCTURAL_SVM_DISTRIBUTeD_ABSTRACT_Hh_
 
 

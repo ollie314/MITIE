@@ -3,21 +3,15 @@ MITIE: MIT Information Extraction
 
 This project provides free (even for commercial use)
 [state-of-the-art](../../wiki/Evaluation) information extraction
-tools. The current release includes tools for performing named entity
-extraction and binary relation detection as well as tools for training
-custom extractors and relation detectors.  
+tools. The current release includes tools for performing [named entity
+extraction](http://blog.dlib.net/2014/04/mitie-completely-free-and-state-of-art.html) 
+and [binary relation detection](http://blog.dlib.net/2014/07/mitie-v02-released-now-includes-python.html) 
+as well as tools for training custom extractors and relation detectors.  
 
-MITIE comes with trained models for English and Spanish.  The English named entity recognition model is 
-trained based on data from the English Gigaword news corpus, the CoNLL 2003 named entity recognition task,
-and ACE data.  The Spanish model is based on the Spanish Gigaword corpus and CoNLL 2002 named entity 
-recognition task.  There are also 21 English binary relation extraction models provided which
-were trained on a 
-[combination of Wikipedia and Freebase data](https://sourceforge.net/projects/mitie/files/freebase_wikipedia_binary_relation_training_data_v1.0.tar.bz2/download).
+MITIE is built on top of [dlib](http://dlib.net), a high-performance machine-learning library[1], MITIE makes use of several state-of-the-art techniques including the use of distributional word embeddings[2] and Structural Support Vector Machines[3].  MITIE offers several pre-trained models providing varying levels of support for both English and Spanish, trained using a variety of linguistic resources (e.g., CoNLL 2003, ACE, [Wikipedia, Freebase](https://github.com/mit-nlp/MITIE/releases/download/v0.4/freebase_wikipedia_binary_relation_training_data_v1.0.tar.bz2), and Gigaword). The core MITIE software is written in C++, but bindings for several other software languages including Python, R, Java, C, and MATLAB allow a user to quickly integrate MITIE into his/her own applications.
 
-Additionally, the core library provides APIs in C, C++, Java, R, and Python 2.7.  Outside
-projects have created bindings for [OCaml](https://github.com/travisbrady/omitie) and 
-[.NET](https://github.com/BayardRock/MITIE-Dot-Net).  Future releases will 
-add bindings in Java, R, and possibly other languages.
+Outside projects have created API bindings for [OCaml](https://github.com/travisbrady/omitie) and 
+[.NET](https://github.com/BayardRock/MITIE-Dot-Net).  There is also an [interactive tool](https://github.com/Sotera/mitie-trainer) for labeling data and training MITIE.
 
 # Using MITIE
 
@@ -32,9 +26,9 @@ model files which you can do by running:
 ```
 make MITIE-models
 ```
-or by simply downloading the [MITIE-models-v0.2.tar.bz2](http://sourceforge.net/projects/mitie/files/binaries/MITIE-models-v0.2.tar.bz2)
+or by simply downloading the [MITIE-models-v0.2.tar.bz2](https://github.com/mit-nlp/MITIE/releases/download/v0.4/MITIE-models-v0.2.tar.bz2)
 file and extracting it in your MITIE folder.  Note that the Spanish models are supplied in 
-a separate download.  So if you want to use the Spanish NER model then download [MITIE-models-v0.2-Spanish.zip](http://sourceforge.net/projects/mitie/files/binaries/MITIE-models-v0.2-Spanish.zip) and
+a separate download.  So if you want to use the Spanish NER model then download [MITIE-models-v0.2-Spanish.zip](https://github.com/mit-nlp/MITIE/releases/download/v0.4/MITIE-models-v0.2-Spanish.zip) and
 extract it into your MITIE folder.
 
 ### Using MITIE from the command line
@@ -65,7 +59,7 @@ by running:
 cd mitielib
 make
 ```
-This produces shared and static library files in the mitielib folder.  On a non-UNIX system you can use
+This produces shared and static library files in the mitielib folder.  Or you can use
 CMake to compile a shared library by typing:
 ```
 cd mitielib
@@ -75,7 +69,24 @@ cmake ..
 cmake --build . --config Release --target install
 ```
 
-Either of these methods will create a MITIE shared library in the mitielib folder.
+Either of these methods will create a MITIE shared library in the mitielib folder. 
+
+### Compiling MITIE using OpenBLAS
+
+If you compile MITIE using cmake then it will automatically find and use any optimized BLAS
+libraries on your machine.  However, if you compile using regular make then you have
+to manually locate your BLAS libaries or DLIB will default to its built in, but slower, BLAS
+implementation.   Therefore, to use OpenBLAS when compiling without cmake, locate `libopenblas.a` and `libgfortran.a`, then
+run `make` as follows:
+```
+cd mitielib 
+make BLAS_PATH=/path/to/openblas.a LIBGFORTRAN_PATH=/path/to/libfortran.a
+```
+Note that if your BLAS libraries are not in standard locations cmake will fail to find them.  However,
+you can tell it what folder to look in by replacing `cmake ..` with a statement such as:
+```
+cmake -DCMAKE_LIBRARY_PATH=/home/me/place/i/put/blas/lib ..
+```
 
 ### Using MITIE from a Python 2.7 program
 
@@ -83,7 +94,10 @@ Once you have built the MITIE shared library, you can go to the [examples/python
 and simply run any of the Python scripts.  Each script is a tutorial explaining some aspect of
 MITIE: [named entity recognition and relation extraction](examples/python/ner.py), 
 [training a custom NER tool](examples/python/train_ner.py), or 
-[training a custom relation extractor](examples/python/train_ner.py).
+[training a custom relation extractor](examples/python/train_relation_extraction.py).
+
+You can also install ``mitie`` package direcly from github:
+``pip install git+https://github.com/mit-nlp/MITIE.git``.
 
 ### Using MITIE from R
 
@@ -150,12 +164,12 @@ example models.  If you require a non-standard C++ compiler, change
 
 # Precompiled Python 2.7 binaries
 
-We have built Python 2.7 binaries packaged with sample models for 64bit Linux and Windows (both 32 and 64 bit version of Python).  You can download the precompiled package here: [Precompiled MITIE 0.2](http://sourceforge.net/projects/mitie/files/binaries/mitie-v0.2-python-2.7-windows-or-linux64.zip)
+We have built Python 2.7 binaries packaged with sample models for 64bit Linux and Windows (both 32 and 64 bit version of Python).  You can download the precompiled package here: [Precompiled MITIE 0.2](https://github.com/mit-nlp/MITIE/releases/download/v0.4/mitie-v0.2-python-2.7-windows-or-linux64.zip)
 
 
 # Precompiled Java 64bit binaries
 
-We have built Java binaries for the 64bit JVM which work on Linux and Windows.  You can download the precompiled package here: [Precompiled Java MITIE 0.3](http://sourceforge.net/projects/mitie/files/binaries/mitie-java-v0.3-windows64-or-linux64.zip).  In the file is an examples/java folder.  You can run the example by executing the provided .bat or .sh file.
+We have built Java binaries for the 64bit JVM which work on Linux and Windows.  You can download the precompiled package here: [Precompiled Java MITIE 0.3](https://github.com/mit-nlp/MITIE/releases/download/v0.4/mitie-java-v0.3-windows64-or-linux64.zip).  In the file is an examples/java folder.  You can run the example by executing the provided .bat or .sh file.
 
 # License
 
@@ -182,3 +196,11 @@ SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE
 FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
+
+# References
+
+[1] Davis E. King. Dlib-ml: A Machine Learning Toolkit. Journal of Machine Learning Research 10, pp. 1755-1758, 2009.
+
+[2] Paramveer Dhillon, Dean Foster and Lyle Ungar, Eigenwords: Spectral Word Embeddings, Journal of Machine Learning Research (JMLR), 16, 2015.
+
+[3] T. Joachims, T. Finley, Chun-Nam Yu, Cutting-Plane Training of Structural SVMs, Machine Learning, 77(1):27-59, 2009.

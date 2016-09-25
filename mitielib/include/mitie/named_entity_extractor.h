@@ -1,6 +1,6 @@
 // Copyright (C) 2014 Massachusetts Institute of Technology, Lincoln Laboratory
 // License: Boost Software License   See LICENSE.txt for the full license.
-// Authors: Davis E. King (davis.king@ll.mit.edu)
+// Authors: Davis E. King (davis@dlib.net)
 #ifndef MIT_LL_MITIE_NaMED_ENTITY_EXTRACTOR_H_
 #define MIT_LL_MITIE_NaMED_ENTITY_EXTRACTOR_H_
 
@@ -41,7 +41,8 @@ namespace mitie
             const total_word_feature_extractor& fe,
             const dlib::sequence_segmenter<ner_feature_extractor>& segmenter,
             const dlib::multiclass_linear_decision_function<dlib::sparse_linear_kernel<ner_sample_type>,unsigned long>& df
-        ); 
+        );
+
         /*!
             requires
                 - segmenter.get_feature_extractor().num_features() == fe.get_num_dimensions() 
@@ -62,6 +63,10 @@ namespace mitie
                   into a meaningful text name for the NER tag.  
         !*/
 
+        named_entity_extractor(const std::string& pureModelName,
+                               const std::string& extractorName
+        );
+
         dlib::uint64 get_fingerprint(
         ) const { return fingerprint; }
         /*!
@@ -73,6 +78,35 @@ namespace mitie
                   specific named_entity_extractor instance can record the fingerprint of
                   the named_entity_extractor they used and use that fingerprint ID to
                   verify that the same named_entity_extractor is being used later on.
+        !*/
+
+        void predict(
+            const std::vector<std::string>& sentence,
+            std::vector<std::pair<unsigned long, unsigned long> >& chunks,
+            std::vector<unsigned long>& chunk_tags,
+            std::vector<double>& chunk_scores
+        ) const;
+        /*!
+            ensures
+                - Runs the named entity recognizer on the sequence of tokenized words
+                  inside sentence.  The detected named entities are stored into chunks.  
+                - #chunks == the locations of the named entities. 
+                - The identified named entities are listed inside chunks in the order in
+                  which they appeared in the input sentence.  
+                - #chunks.size() == #chunk_tags.size()
+                - for all valid i:
+                    - #chunk_tags[i] == the label for the entity at location #chunks[i].  Moreover, 
+                      chunk tag ID numbers are contiguous and start at 0.  Therefore we have:
+                        - 0 <= #chunk_tags[i] < get_tag_name_strings().size()
+                    - #chuck_score[i] == the score for the entity at location #chunks[i]. The value
+                      represents a confidence score, but does not represent a probability. Accordingly,
+                      the value may range outside of the closed interval of 0 to 1. A larger value
+                      represents a higher confidence. A value < 0 indicates that the label is likely
+                      incorrect. That is, the canonical decision threshold is at 0.
+                    - #chunks[i] == a half open range indicating where the entity is within
+                      sentence.  In particular, the entity is composed of the tokens
+                      sentence[#chunks[i].first] through sentence[#chunks[i].second-1].
+                    - The textual label for the i-th entity is get_tag_name_strings()[#chunk_tags[i]].
         !*/
 
         void operator() (
@@ -131,6 +165,15 @@ namespace mitie
 
         const total_word_feature_extractor& get_total_word_feature_extractor(
         ) const { return fe; }
+
+        const dlib::sequence_segmenter<ner_feature_extractor>& get_segmenter() const {
+            return segmenter;
+        }
+
+        const dlib::multiclass_linear_decision_function<dlib::sparse_linear_kernel<ner_sample_type>,unsigned long>& get_df() const {
+            return df;
+        };
+
 
     private:
         void compute_fingerprint()

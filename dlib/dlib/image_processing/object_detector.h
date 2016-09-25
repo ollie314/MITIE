@@ -1,7 +1,7 @@
 // Copyright (C) 2011  Davis E. King (davis@dlib.net)
 // License: Boost Software License   See LICENSE.txt for the full license.
-#ifndef DLIB_OBJECT_DeTECTOR_H__
-#define DLIB_OBJECT_DeTECTOR_H__
+#ifndef DLIB_OBJECT_DeTECTOR_Hh_
+#define DLIB_OBJECT_DeTECTOR_Hh_
 
 #include "object_detector_abstract.h"
 #include "../geometry.h"
@@ -67,11 +67,12 @@ namespace dlib
 // ----------------------------------------------------------------------------------------
 
     template <
-        typename image_scanner_type
+        typename image_scanner_type_
         >
     class object_detector
     {
     public:
+        typedef image_scanner_type_ image_scanner_type;
         typedef typename image_scanner_type::feature_vector_type feature_vector_type;
 
         object_detector (
@@ -340,7 +341,7 @@ namespace dlib
         boxes_overlap(overlap_tester)
     {
         // make sure requires clause is not broken
-        DLIB_ASSERT(scanner_.get_num_detection_templates() > 0 && w_.size() > 0,
+        DLIB_CASSERT(scanner_.get_num_detection_templates() > 0 && w_.size() > 0,
             "\t object_detector::object_detector(scanner_,overlap_tester,w_)"
             << "\n\t Invalid inputs were given to this function "
             << "\n\t scanner_.get_num_detection_templates(): " << scanner_.get_num_detection_templates()
@@ -348,10 +349,9 @@ namespace dlib
             << "\n\t this: " << this
             );
 
-#ifdef ENABLE_ASSERTS
         for (unsigned long i = 0; i < w_.size(); ++i)
         {
-            DLIB_ASSERT(w_[i].size() == scanner_.get_num_dimensions() + 1, 
+            DLIB_CASSERT(w_[i].size() == scanner_.get_num_dimensions() + 1, 
                 "\t object_detector::object_detector(scanner_,overlap_tester,w_)"
                 << "\n\t Invalid inputs were given to this function "
                 << "\n\t scanner_.get_num_detection_templates(): " << scanner_.get_num_detection_templates()
@@ -360,7 +360,6 @@ namespace dlib
                 << "\n\t this: " << this
                 );
         }
-#endif
 
         scanner.copy_configuration(scanner_);
         w.resize(w_.size());
@@ -381,7 +380,7 @@ namespace dlib
         const std::vector<object_detector>& detectors
     )
     {
-        DLIB_ASSERT(detectors.size() != 0,
+        DLIB_CASSERT(detectors.size() != 0,
                 "\t object_detector::object_detector(detectors)"
                 << "\n\t Invalid inputs were given to this function "
                 << "\n\t this: " << this
@@ -622,6 +621,6 @@ namespace dlib
 
 }
 
-#endif // DLIB_OBJECT_DeTECTOR_H__
+#endif // DLIB_OBJECT_DeTECTOR_Hh_
 
 

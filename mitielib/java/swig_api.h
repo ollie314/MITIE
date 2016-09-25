@@ -1,6 +1,6 @@
 // Copyright (C) 2014 Massachusetts Institute of Technology, Lincoln Laboratory
 // License: Boost Software License   See LICENSE.txt for the full license.
-// Authors: Davis E. King (davis.king@ll.mit.edu)
+// Authors: Davis E. King (davis@dlib.net)
 #ifndef MITLL_MITIE_JAVA_ApI_H_
 #define MITLL_MITIE_JAVA_ApI_H_
 
@@ -9,9 +9,11 @@
 #ifdef SWIG
 %include "std_string.i"
 %include "std_vector.i"
+%include "std_pair.i"
 %template(StringVector)         std::vector<std::string>;
 %template(TokenIndexVector)     std::vector<TokenIndexPair>;
 %template(EntityMentionVector)  std::vector<EntityMention>;
+%template(SDPair)               std::pair<std::string, double>;
 #endif
 
 
@@ -22,6 +24,9 @@
 #include <mitie/conll_tokenizer.h>
 #include <mitie/binary_relation_detector.h>
 #include <mitie/named_entity_extractor.h>
+#include <mitie/ner_trainer.h>
+#include <mitie/text_categorizer.h>
+#include <mitie/text_categorizer_trainer.h>
 
 
 // ----------------------------------------------------------------------------------------
@@ -94,13 +99,14 @@ std::vector<TokenIndexPair> tokenizeWithOffsets (
 class EntityMention
 {
 public:
-    EntityMention() : start(0),end(0),tag(0) {}
-    EntityMention (int start_, int end_) : start(start_), end(end_), tag(0) {}
-    EntityMention (int start_, int end_, int tag_) : start(start_), end(end_), tag(tag_) {}
+    EntityMention() : start(0),end(0),tag(0),score(0.0) {}
+    EntityMention (int start_, int end_) : start(start_), end(end_), tag(0), score(0.0) {}
+    EntityMention (int start_, int end_, int tag_, double score_) : start(start_), end(end_), tag(tag_), score(score_) {}
 
     int start;
     int end;
     int tag;
+    double score;
 };
 
 struct BinaryRelation
@@ -122,6 +128,13 @@ public:
         dlib::deserialize(filename) >> classname >> impl;
     }
 
+    NamedEntityExtractor(const std::string& pureModelName,
+               const std::string& extractorName
+    ) :impl(pureModelName, extractorName)
+    {
+
+    }
+
     std::vector<std::string> getPossibleNerTags (
     ) const
     {
@@ -140,11 +153,12 @@ public:
     ) const
     {
         std::vector<std::pair<unsigned long, unsigned long> > ranges;
-        std::vector<unsigned long> predicted_labels; 
-        impl(tokens, ranges, predicted_labels);
+        std::vector<unsigned long> predicted_labels;
+        std::vector<double> predicted_scores;
+        impl.predict(tokens, ranges, predicted_labels, predicted_scores);
         std::vector<EntityMention> temp;
         for (unsigned long i = 0; i < ranges.size(); ++i)
-            temp.push_back(EntityMention(ranges[i].first, ranges[i].second, predicted_labels[i]));
+            temp.push_back(EntityMention(ranges[i].first, ranges[i].second, predicted_labels[i], predicted_scores[i]));
         return temp;
     }
 
@@ -162,8 +176,8 @@ public:
     }
 
     BinaryRelation extractBinaryRelation(
-        const std::vector<std::string>& tokens, 
-        const EntityMention& arg1, 
+        const std::vector<std::string>& tokens,
+        const EntityMention& arg1,
         const EntityMention& arg2
     ) const
     {
@@ -173,9 +187,9 @@ public:
             throw dlib::error("Invalid entity mention ranges given to NamedEntityExtractor.extractBinaryRelation().");
         }
         BinaryRelation temp;
-        temp.item = extract_binary_relation(tokens, 
-                                            std::make_pair(arg1.start,arg1.end), 
-                                            std::make_pair(arg2.start,arg2.end), 
+        temp.item = extract_binary_relation(tokens,
+                                            std::make_pair(arg1.start,arg1.end),
+                                            std::make_pair(arg2.start,arg2.end),
                                             impl.get_total_word_feature_extractor());
         return temp;
     }
@@ -227,22 +241,152 @@ private:
 // ----------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------
 
-/* TODO, fill out the training API for java at some point.
-class NerTrainingInstance
-{
+class NerTrainingInstance {
+public:
+    NerTrainingInstance(std::vector<std::string> &tokens
+    ) : impl(tokens)
+    {
+    }
+
+    void addEntity(unsigned long start,
+                   unsigned long length,
+                   const char *label) 
+    {
+        impl.add_entity(start, length, label);
+    }
+
+    unsigned long getSize() 
+    {
+        return impl.num_tokens();
+    }
+
+private:
+    friend class NerTrainer;
+    mitie::ner_training_instance impl;
 };
 
 class NerTrainer
 {
+public:
+    NerTrainer(const std::string& filename) : impl(filename) 
+    {
+    }
+
+    void add(const NerTrainingInstance& item) 
+    {
+        impl.add(item.impl);
+    }
+
+    void setThreadNum(unsigned long num) 
+    {
+        impl.set_num_threads(num);
+    }
+
+    void train(const std::string& filename) const
+    {
+        mitie::named_entity_extractor obj = impl.train();
+        dlib::serialize(filename) << "mitie::named_entity_extractor" << obj;
+    }
+
+    void trainSeparateModels(const std::string& filename) const
+    {
+        mitie::named_entity_extractor obj = impl.train();
+        dlib::serialize(filename)
+        << "mitie::named_entity_extractor_pure_model"
+        << obj.get_df()
+        << obj.get_segmenter()
+        << obj.get_tag_name_strings();
+    }
+private:
+    mitie::ner_trainer impl;
 };
 
-class BinaryRelationDetectorTrainer
+// ----------------------------------------------------------------------------------------
+
+class TextCategorizer
 {
-};
-*/
+public:
+    TextCategorizer (
+            const std::string& filename
+    )
+    {
+        std::string classname;
+        dlib::deserialize(filename) >> classname;
+        if (classname != "mitie::text_categorizer")
+            throw dlib::error("This file does not contain a mitie::text_categorizer. Contained: " + classname);
+        dlib::deserialize(filename) >> classname >> impl;
+    }
 
+    TextCategorizer (const std::string& pureModelName,
+                         const std::string& extractorName
+    ) :impl(pureModelName, extractorName)
+    {
+
+    }
+
+    std::vector<std::string> getPossibleNerTags (
+    ) const
+    {
+        return impl.get_tag_name_strings();
+    }
+
+    void saveToDisk (
+            const std::string& filename
+    ) const
+    {
+        dlib::serialize(filename) << "mitie::text_categorizer" << impl;
+    }
+
+    std::pair<std::string, double> categorizeDoc (
+            const std::vector<std::string>& words
+    ) const
+    {
+        std::string predicted_label;
+        double predicted_score;
+        impl.predict(words, predicted_label, predicted_score);
+        return std::make_pair(predicted_label, predicted_score);
+    }
+
+private:
+    mitie::text_categorizer impl;
+};
 // ----------------------------------------------------------------------------------------
-// ----------------------------------------------------------------------------------------
+
+class TextCategorizerTrainer
+{
+public:
+    TextCategorizerTrainer(const std::string& filename) : impl(filename)
+    {
+    }
+
+    void add(const std::vector<std::string>& words,
+             const std::string& label)
+    {
+        impl.add(words, label);
+    }
+
+    void setThreadNum(unsigned long num)
+    {
+        impl.set_num_threads(num);
+    }
+
+    void train(const std::string& filename) const
+    {
+        mitie::text_categorizer obj = impl.train();
+        dlib::serialize(filename) << "mitie::text_categorizer" << obj;
+    }
+
+    void trainSeparateModels(const std::string& filename) const
+    {
+        mitie::text_categorizer obj = impl.train();
+        dlib::serialize(filename)
+        << "mitie::text_categorizer_pure_model"
+        << obj.get_df()
+        << obj.get_tag_name_strings();
+    }
+private:
+    mitie::text_categorizer_trainer impl;
+};
 // ----------------------------------------------------------------------------------------
 
 
